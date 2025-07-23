@@ -1,0 +1,69 @@
+# Node.js và npm
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Môi trường
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# TypeScript
+dist/
+build/
+*.tsbuildinfo
+
+# React
+/build/
+/public/build/
+/dist/
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# IDE và editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Hệ điều hành
+.DS_Store
+Thumbs.db
+
+# Tạm thời và cache
+*.cache
+*.tmp
+temp/
+tmp/
+
+# MongoDB local
+data/
+*.pid
+
+# Công cụ build và test
+coverage/
+.jest/
+.eslintcache
+*.lcov
+
+# Docker
+docker-compose.yml
+Dockerfile
+*.dockerignore
+
+# Các file khác
+*.bak
+*.gho
+*.ori
+*.orig
+*.tmp
