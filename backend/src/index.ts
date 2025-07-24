@@ -4,14 +4,8 @@ const port = process.env.PORT || 2024;
 
 const server = http.createServer(app);
 
-connectDB();
-
 app.listen(port, () => {
-  console.log(`🚀 Server is running at http://localhost:${port}`);
-});
-
-app.get('/', (req, res) => {
-  res.send('server is running');
+  console.log(`🚀 Server is running at http://localhost:${port}/api-docs`);
 });
 
 process.on('SIGINT', () => {

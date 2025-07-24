@@ -15,7 +15,7 @@ const options: swaggerJsdoc.Options = {
       },
     ],
   },
-  apis: ['src/routes/**/*.ts', 'src/controllers/**/*.ts'], // Nếu chạy file .js, sửa thành dist/**/*.js
+  apis: ['src/routes/**/*.ts', 'src/controllers/**/*.ts', 'src/docs/**/*.ts'], // Nếu chạy file .js, sửa thành dist/**/*.js
 };
 export const swaggerSpec = swaggerJsdoc(options);
 export { swaggerUi };
