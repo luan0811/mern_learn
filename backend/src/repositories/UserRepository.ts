@@ -1,4 +1,12 @@
-import UserModel from '../models/User';
+import UserModel, { IUserDocument } from "../models/User";
+import { IUser } from "../interfaces/user.interface";
 
-export const findByEmail = (email: string) => UserModel.findOne({ email });
-export const createUser = (data: any) => new UserModel(data).save();
+export class UserRepository {
+  async create(user: IUser): Promise<IUserDocument> {
+    return await UserModel.create(user);
+  }
+
+  async findByEmail(email: string): Promise<IUserDocument | null> {
+    return await UserModel.findOne({ email });
+  }
+}

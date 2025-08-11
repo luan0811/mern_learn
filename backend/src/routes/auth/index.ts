@@ -1,16 +1,10 @@
-import express from 'express';
-import * as AuthController from '../../controllers/AuthController';
+import { AuthController } from './../../controllers/AuthController';
+import { Router } from "express";
 
-/**
- * @swagger
- * tags:
- *   name: Authentication
- *   description: User authentication endpoints
- */
+const router = Router();
+const authController = new AuthController();
 
-const router = express.Router();
-
-router.post('/register', AuthController.register);
-router.post('/login', AuthController.login);
+router.post("/register", authController.register);
+router.post("/login", authController.login);
 
 export default router;

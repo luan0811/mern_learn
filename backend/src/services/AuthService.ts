@@ -1,54 +1,72 @@
-import * as UserRepo from "../repositories/UserRepository";
-import * as RefreshTokenRepo from "../repositories/RefreshTokenRepository";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
+import { UserRepository } from "../repositories/UserRepository";
+import { RefreshTokenRepository } from "../repositories/RefreshTokenRepository";
+import { IUser } from "../interfaces/user.interface";
 
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "access_secret";
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "refresh_secret";
 
-export const register = async (email: string, password: string) => {
-  const existingUser = await UserRepo.findByEmail(email);
-  if (existingUser) throw new Error("Email already exists");
+export class UserService {
+  private userRepository: UserRepository;
+  private refreshTokenRepository: RefreshTokenRepository;
 
-  const hashed = await bcrypt.hash(password, 10);
-  return await UserRepo.createUser({ email, password: hashed });
-};
-
-export const login = async (email: string, password: string) => {
-  const user = await UserRepo.findByEmail(email);
-  if (!user) throw new Error("Invalid email or password");
-
-  if (!user.isActive) throw new Error("Account is deactivated");
-
-  const isValidPassword = await bcrypt.compare(password, user.password);
-  if (!isValidPassword) throw new Error("Invalid email or password");
-
-  // Ensure JWT_SECRET is defined
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) {
-    throw new Error("JWT_SECRET environment variable is not set");
+  constructor() {
+    this.userRepository = new UserRepository();
+    this.refreshTokenRepository = new RefreshTokenRepository();
   }
 
-  const accessToken = jwt.sign(
-    { userId: user._id, email: user.email, role: user.role },
-    jwtSecret, // Use the validated secret
-    { expiresIn: process.env.JWT_EXPIRES_IN as unknown as number || "15m" }
-  );
+    private generateAccessToken(payload: object) {
+    return jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
+  }
 
-  const refreshToken = uuidv4();
-  const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  private generateRefreshToken(payload: object) {
+    return jwt.sign(payload, REFRESH_TOKEN_SECRET, { expiresIn: "30d" });
+  }
 
-  await RefreshTokenRepo.create({
-    token: refreshToken,
-    userId: user._id,
-    expiresAt: refreshTokenExpiry,
-  });
+  async register(userData: IUser) {
+    const existingUser = await this.userRepository.findByEmail(userData.email);
+    if (existingUser) {
+      throw new Error("Email already exists");
+    }
 
-  const { password: _, ...userWithoutPassword } = user.toObject();
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    userData.password = hashedPassword;
 
-  return {
-    user: userWithoutPassword,
-    accessToken,
-    refreshToken,
-    expiresIn: process.env.JWT_EXPIRES_IN || "15m",
-  };
-};
+    const newUser = await this.userRepository.create(userData);
+    return newUser;
+  }
+  
+   async login(email: string, password: string) {
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) {
+      throw new Error("Invalid email or password");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new Error("Invalid email or password");
+    }
+
+    // Generate tokens
+    const payload = { id: user._id, role: user.role };
+    const accessToken = this.generateAccessToken(payload);
+    const refreshToken = this.generateRefreshToken(payload);
+
+    // Save refresh token to DB
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
+    await this.refreshTokenRepository.create({
+      token: refreshToken,
+      userId: user._id,
+      expiresAt,
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+      user,
+    };
+  }
+}
