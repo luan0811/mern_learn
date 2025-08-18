@@ -7,7 +7,7 @@ import { IUser } from "../interfaces/user.interface";
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "access_secret";
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "refresh_secret";
 
-export class UserService {
+export class AuthService {
   private userRepository: UserRepository;
   private refreshTokenRepository: RefreshTokenRepository;
 

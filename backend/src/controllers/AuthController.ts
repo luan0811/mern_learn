@@ -1,13 +1,15 @@
 import '../docs/auth.docs'
 import { Request, Response } from "express";
-import { UserService } from "../services/AuthService";
+import { AuthService } from "../services/AuthService";
 
-const userService = new UserService();
+const authService = new AuthService();
 
 export class AuthController {
+
+  
   async register(req: Request, res: Response) {
     try {
-      const user = await userService.register(req.body);
+      const user = await authService.register(req.body);
       res.status(201).json({
         message: "User registered successfully",
         user,
@@ -20,7 +22,7 @@ export class AuthController {
   async login(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
-      const result = await userService.login(email, password);
+      const result = await authService.login(email, password);
 
       res.status(200).json({
         message: "Login successful",
