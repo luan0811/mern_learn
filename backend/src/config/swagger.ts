@@ -11,11 +11,26 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:2024/' // Sửa từ api thành url
+        url: 'http://localhost:2024/'
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {               // định nghĩa scheme
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],             // 👈 áp dụng cho toàn bộ API
       },
     ],
   },
-  apis: ['src/routes/**/*.ts', 'src/controllers/**/*.ts', 'src/docs/**/*.ts'], // Nếu chạy file .js, sửa thành dist/**/*.js
+  apis: ['src/routes/**/*.ts', 'src/controllers/**/*.ts', 'src/docs/**/*.ts'],
 };
+
 export const swaggerSpec = swaggerJsdoc(options);
 export { swaggerUi };

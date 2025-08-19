@@ -25,7 +25,6 @@
  *           default: user
  *           description: Vai trò của người dùng
  *       example:
- *         username: "john_doe"
  *         email: "john@example.com"
  *         password: "password123"
  *         role: "user"
@@ -39,7 +38,6 @@
  *       example:
  *         message: "User created successfully"
  *         user:
- *           username: "john_doe"
  *           email: "john@example.com"
  *           role: "user"
  *
@@ -76,4 +74,40 @@
  *       401:
  *         description: Không có quyền truy cập
  *       403:
- *         description: Không có quyền admin */
+ *         description: Không có quyền admin
+ *
+ * /api/v1/user/AdminGetAllUsers:
+ *   get:
+ *     summary: Lấy danh sách tất cả người dùng (Admin)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách người dùng thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *             example:
+ *               - email: "john@example.com"
+ *                 role: "user"
+ *               - email: "admin@example.com"
+ *                 role: "admin"
+ *       400:
+ *         description: Lỗi khi lấy dữ liệu
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *               example:
+ *                 message: "Error fetching users"
+ *       401:
+ *         description: Không có quyền truy cập
+ *       403:
+ *         description: Không có quyền */

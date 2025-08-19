@@ -7,5 +7,5 @@ const userController = new UserController();
 const router = Router();
 
 router.post("/AdminCreateUser", verifyToken, isAdmin, (req, res) => userController.createUser(req, res));
-
+router.get("/AdminGetAllUsers", verifyToken, isAdmin, (req, res) => userController.getAllUsers(req, res));
 export default router;

@@ -4,38 +4,47 @@ import { IUser } from "../interfaces/user.interface";
 import bcrypt from "bcrypt";
 
 export class UserService {
-    private userRepository: UserRepository;
-    private refreshTokenRepository: RefreshTokenRepository;
+  private userRepository: UserRepository;
+  private refreshTokenRepository: RefreshTokenRepository;
 
-    constructor() {
-        this.userRepository = new UserRepository();
-        this.refreshTokenRepository = new RefreshTokenRepository();
-    }
+  constructor() {
+    this.userRepository = new UserRepository();
+    this.refreshTokenRepository = new RefreshTokenRepository();
+  }
 
-    async createUser(userData: IUser): Promise<IUser> {
-        const existingUser = await this.userRepository.findByEmail(userData.email);
-        if (existingUser) {
-            throw new Error("User already exists");
-        }
-         const hashedPassword = await bcrypt.hash(userData.password, 10);
-            userData.password = hashedPassword;
-        const newUser = await this.userRepository.create(userData);
-        return newUser;
+  async createUser(userData: IUser): Promise<IUser> {
+    const existingUser = await this.userRepository.findByEmail(userData.email);
+    if (existingUser) {
+      throw new Error("User already exists");
     }
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    userData.password = hashedPassword;
+    const newUser = await this.userRepository.create(userData);
+    return newUser;
+  }
 
-    async getAllUsers(): Promise<IUser[]> {
-        return await this.userRepository.findAll();
-    }
+  async getAllUsers(): Promise<IUser[]> {
+    const users = await this.userRepository.findAll();
 
-    async getUserById(id: string): Promise<IUser | null> {
-        return await this.userRepository.findById(id);
-    }
+    // map lại user object, bỏ password
+    return users.map((user) => {
+      const { password, ...rest } = user.toObject(); // nếu dùng mongoose
+      return rest;
+    });
+  }
 
-    async updateUser(id: string, userData: Partial<IUser>): Promise<IUser | null> {
-        return await this.userRepository.updateById(id, userData);
-    }
+  async getUserById(id: string): Promise<IUser | null> {
+    return await this.userRepository.findById(id);
+  }
 
-    async deleteUser(id: string): Promise<IUser | null> {
-        return await this.userRepository.deleteById(id);
-    }
+  async updateUser(
+    id: string,
+    userData: Partial<IUser>
+  ): Promise<IUser | null> {
+    return await this.userRepository.updateById(id, userData);
+  }
+
+  async deleteUser(id: string): Promise<IUser | null> {
+    return await this.userRepository.deleteById(id);
+  }
 }

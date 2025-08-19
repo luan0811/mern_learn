@@ -13,4 +13,8 @@ export class RefreshTokenRepository {
   async deleteByToken(token: string): Promise<void> {
     await RefreshTokenModel.deleteOne({ token });
   }
+
+  async deleteByUserId(userId: string): Promise<void> {
+    await RefreshTokenModel.deleteMany({ userId });
+  }
 }

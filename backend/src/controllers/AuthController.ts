@@ -34,4 +34,30 @@ export class AuthController {
       res.status(400).json({ message: error.message });
     }
   }
+
+  async changePassword(req: Request, res: Response) {
+    try {
+      const { oldPassword, newPassword } = req.body;
+      const userId = (req as any).user.id; // từ middleware verifyToken
+
+      const result = await authService.changePassword(userId, oldPassword, newPassword);
+      
+      res.status(200).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+
+  async logout(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user.id; // từ middleware verifyToken
+      const { refreshToken } = req.body; // optional: refresh token cụ thể cần xóa
+
+      const result = await authService.logout(userId, refreshToken);
+      
+      res.status(200).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  }
 }
