@@ -110,4 +110,63 @@
  *       401:
  *         description: Không có quyền truy cập
  *       403:
- *         description: Không có quyền */
+ *         description: Không có quyền truy cập
+ *       404:
+ *         description: Không tìm thấy người dùng
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *               example:
+ *                 message: "User not found"
+ * 
+ * /api/v1/user/AdminGetUserById/{id}:
+ *   get:
+ *     summary: Lấy thông tin người dùng theo ID (Admin)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID của người dùng
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Lấy thông tin người dùng thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Lỗi khi lấy dữ liệu
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *               example:
+ *                 message: "Error fetching user"
+ *       401:
+ *         description: Không có quyền truy cập
+ *       403:
+ *         description: Không có quyền admin
+ *       404:
+ *         description: Không tìm thấy người dùng
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *               example:
+ *                 message: "User not found"
+ */

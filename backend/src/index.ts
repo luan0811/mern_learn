@@ -1,6 +1,6 @@
 import app, { connectDB } from './app';
 import * as http from 'http';
-const port = process.env.PORT || 2024;
+const port = process.env.PORT;
 
 const server = http.createServer(app);
 

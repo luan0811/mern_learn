@@ -10,7 +10,7 @@ import routes from './routes';
 
 const app = express();
 
-dotenv.config();
+dotenv.config({ path: "./.env" });
 
 export const connectDB = async () => {
   try {
