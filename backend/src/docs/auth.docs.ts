@@ -138,6 +138,39 @@
  *       example:
  *         message: "Password changed successfully. Please login again."
  *
+ *     RefreshTokenRequest:
+ *       type: object
+ *       required:
+ *         - refreshToken
+ *       properties:
+ *         refreshToken:
+ *           type: string
+ *           description: Refresh token để tạo access token mới
+ *       example:
+ *         refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ * 
+ *     RefreshTokenResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         accessToken:
+ *           type: string
+ *           description: JWT access token mới
+ *         refreshToken:
+ *           type: string
+ *           description: Refresh token mới
+ *         user:
+ *           $ref: '#/components/schemas/User'
+ *       example:
+ *         message: "Token refreshed successfully"
+ *         accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *         refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *         user:
+ *           id: 507f1f77bcf86cd799439011
+ *           email: user@example.com
+ *           role: user
+ * 
  * /api/v1/auth/register:
  *   post:
  *     summary: Register a new user
@@ -263,4 +296,44 @@
  *                 message: "Current password is incorrect"
  *       401:
  *         description: Không có quyền truy cập
+ * 
+ * /api/v1/auth/refresh-token:
+ *   post:
+ *     summary: Tạo access token mới từ refresh token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RefreshTokenRequest'
+ *     responses:
+ *       200:
+ *         description: Tạo token mới thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RefreshTokenResponse'
+ *       400:
+ *         description: Refresh token không hợp lệ hoặc thiếu
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *               example:
+ *                 message: "Refresh token is required"
+ *       401:
+ *         description: Refresh token hết hạn hoặc không hợp lệ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *               example:
+ *                 message: "Refresh token has expired"
  */

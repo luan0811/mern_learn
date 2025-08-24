@@ -18,7 +18,7 @@ export class AuthService {
     if (!process.env.ACCESS_TOKEN_SECRET) {
       throw new Error('ACCESS_TOKEN_SECRET is not defined in environment variables');
     }
-    return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+    return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
   }
 
   private generateRefreshToken(payload: object) {
@@ -70,11 +70,12 @@ export class AuthService {
       userId: user._id,
       expiresAt,
     });
+  const { password: _, ...userWithoutPassword } = user.toObject();
 
     return {
       accessToken,
       refreshToken,
-      user,
+      user: userWithoutPassword,
     };
   }
 
@@ -106,6 +107,77 @@ export class AuthService {
       return { message: 'Logout successful' };
     } catch (error) {
       throw new Error('Error during logout');
+    }
+  }
+
+  async refreshToken(refreshToken: string) {
+    if (!refreshToken) {
+      throw new Error('Refresh token is required');
+    }
+
+    // Kiểm tra refresh token trong database
+    const storedToken = await this.refreshTokenRepository.findByToken(refreshToken);
+    if (!storedToken) {
+      throw new Error('Invalid refresh token');
+    }
+
+    // Kiểm tra token có hết hạn không
+    if (storedToken.expiresAt < new Date()) {
+      // Xóa token hết hạn
+      await this.refreshTokenRepository.deleteByToken(refreshToken);
+      throw new Error('Refresh token has expired');
+    }
+
+    // Verify refresh token
+    if (!process.env.REFRESH_TOKEN_SECRET) {
+      throw new Error('REFRESH_TOKEN_SECRET is not defined');
+    }
+
+    try {
+      const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET) as any;
+      
+      // Lấy thông tin user từ database
+      const user = await this.userRepository.findById(decoded.id);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      // Kiểm tra user có active không
+      if (!user.isActive) {
+        throw new Error('User account is deactivated');
+      }
+
+      // Tạo access token mới
+      const payload = { id: user._id, role: user.role, email: user.email };
+      const newAccessToken = this.generateAccessToken(payload);
+
+      // Tùy chọn: Tạo refresh token mới (rotation)
+      const newRefreshToken = this.generateRefreshToken(payload);
+      
+      // Xóa refresh token cũ và tạo mới
+      await this.refreshTokenRepository.deleteByToken(refreshToken);
+      
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30);
+
+      await this.refreshTokenRepository.create({
+        token: newRefreshToken,
+        userId: user._id,
+        expiresAt,
+      });
+
+      const { password: _, ...userWithoutPassword } = user.toObject();
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+        user: userWithoutPassword,
+      };
+
+    } catch (error) {
+      // Xóa token không hợp lệ
+      await this.refreshTokenRepository.deleteByToken(refreshToken);
+      throw new Error('Invalid refresh token');
     }
   }
 }

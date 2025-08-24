@@ -2,11 +2,11 @@ import '../docs/auth.docs'
 import { Request, Response } from "express";
 import { AuthService } from "../services/AuthService";
 
+
 const authService = new AuthService();
 
 export class AuthController {
 
-  
   async register(req: Request, res: Response) {
     try {
       const user = await authService.register(req.body);
@@ -56,6 +56,27 @@ export class AuthController {
       const result = await authService.logout(userId, refreshToken);
       
       res.status(200).json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+
+  async refreshToken(req: Request, res: Response) {
+    try {
+      const { refreshToken } = req.body;
+
+      if (!refreshToken) {
+        return res.status(400).json({ message: "Refresh token is required" });
+      }
+
+      const result = await authService.refreshToken(refreshToken);
+
+      res.status(200).json({
+        message: "Token refreshed successfully",
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        user: result.user,
+      });
     } catch (error: any) {
       res.status(400).json({ message: error.message });
     }
